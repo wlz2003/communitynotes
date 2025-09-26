@@ -1,36 +1,93 @@
 from datetime import datetime
 from typing import Dict, List
 
-from cnapi.xurl_util import run_xurl
+import requests
+from typing import Dict, List, Optional
+from pydantic import BaseModel
+from enum import Enum
+class ProposedNote(BaseModel):
+    post_id: str
+    note_text: str
+    trustworthy_sources: bool = True
 
-from data_models import Media, Post, PostWithContext
 
+class MisleadingTag(str, Enum):
+    factual_error = "factual_error"
+    manipulated_media = "manipulated_media"
+    outdated_information = "outdated_information"
+    missing_important_context = "missing_important_context"
+    disputed_claim_as_fact = "disputed_claim_as_fact"
+    misinterpreted_satire = "misinterpreted_satire"
+    other = "other"
+
+
+class ProposedMisleadingNote(ProposedNote):
+    misleading_tags: List[MisleadingTag]
+
+
+class Media(BaseModel):
+    media_key: str
+    media_type: str
+    url: Optional[str] = None
+    preview_image_url: Optional[str] = None
+    height: Optional[int] = None
+    width: Optional[int] = None
+    duration_ms: Optional[int] = None
+    view_count: Optional[int] = None
+
+
+class Post(BaseModel):
+    post_id: str
+    author_id: str
+    created_at: datetime
+    text: str
+    media: List[Media]
+
+
+class PostWithContext(BaseModel):
+    post: Post
+    quoted_post: Optional[Post] = None
+    in_reply_to_post: Optional[Post] = None
+
+
+class NoteResult(BaseModel):
+    note: Optional[ProposedMisleadingNote] = None
+    refusal: Optional[str] = None
+    error: Optional[str] = None
+    post: Optional[PostWithContext] = None
+    context_description: Optional[str] = None
 
 def _fetch_posts_eligible_for_notes(
-    max_results: int = 2, test_mode: bool = True
-) -> dict:
+    bearer_token: str,
+    max_results: int = 2,
+    test_mode: bool = True,
+) -> Dict:
     """
-    Fetch posts eligible for notes by calling the Community Notes API.
-    For more details, see: https://docs.x.com/x-api/community-notes/introduction
-    Args:
-        max_results: Maximum number of results to return (default is 2).
-        test_mode: If True, use test mode for the API (default is True).
-    Returns:
-        A dictionary containing the API response.
+    Fetch posts eligible for notes by calling the Community Notes API directly via HTTP request.
+    Prints full response content if the request fails.
     """
-    path = (
-        "/2/notes/search/posts_eligible_for_notes"
-        f"?test_mode={'true' if test_mode else 'false'}"
-        f"&max_results={max_results}"
-        "&tweet.fields=author_id,created_at,referenced_tweets,media_metadata,note_tweet"
-        "&expansions=attachments.media_keys,referenced_tweets.id,referenced_tweets.id.attachments.media_keys"
-        "&media.fields=alt_text,duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants"
-    )
-    cmd = [
-        "xurl",
-        path,
-    ]
-    return run_xurl(cmd)
+    url = "https://api.x.com/2/notes/search/posts_eligible_for_notes"
+    params = {
+        "test_mode": str(test_mode).lower(),
+        "max_results": max_results,
+        "tweet.fields": "author_id,created_at,referenced_tweets,media_metadata,note_tweet",
+        "expansions": "attachments.media_keys,referenced_tweets.id,referenced_tweets.id.attachments.media_keys",
+        "media.fields": "alt_text,duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants",
+    }
+    headers = {"Authorization": f"Bearer {bearer_token}"}
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if not response.ok:
+        print("=== Response Debug Info ===")
+        print(f"Status Code: {response.status_code}")
+        print("Headers:", response.headers)
+        print("Body:", response.text)
+        print("===========================")
+
+    response.raise_for_status()
+    return response.json()
+
 
 def _parse_individual_post(item: Dict, media_by_key: Dict[str, Dict]) -> Post:
     media_objs: List[Media] = []
@@ -125,5 +182,9 @@ def get_posts_eligible_for_notes(
         A list of `Post` objects.
     """
     return _parse_posts_eligible_response(
-        _fetch_posts_eligible_for_notes(max_results, test_mode)
+        _fetch_posts_eligible_for_notes("ZlZteGZVRGYwRkV2aWEyYmhhZU1rbkxVcGtHYWQtUF9QUHV4bjZmQzRSMFJ3OjE3NTg4OTcxODg0NTk6MTowOmF0OjE",max_results, test_mode)
     )
+
+
+if __name__ == "__main__":
+    print(get_posts_eligible_for_notes())

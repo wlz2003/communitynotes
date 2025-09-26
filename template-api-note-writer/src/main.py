@@ -4,20 +4,32 @@ from typing import List
 
 from cnapi.get_api_eligible_posts import get_posts_eligible_for_notes
 from cnapi.submit_note import submit_note
-from data_models import NoteResult, Post, PostWithContext
+from data_models import NoteResult, Post, PostWithContext,ProposedMisleadingNote
 import dotenv
 from note_writer.write_note import research_post_and_write_note
 
 
 def _worker(
     post_with_context: PostWithContext,
-    dry_run: bool = False,
+    dry_run: bool = True,
 ):
     """
     Fetch and try to write and submit a note for one post.
     If `dry_run` is True, do not submit notes to the API, just print them to the console.
     """
     note_result: NoteResult = research_post_and_write_note(post_with_context)
+    # note_result = NoteResult(
+    #     context_description="This is a test, please ignore or rate it as not helpful.",
+    #     post=post_with_context,
+    #     error=None,
+    #     refusal=None,
+    #     note=ProposedMisleadingNote(
+    #         misleading_tags=["other"],
+    #         note_text="This is a test, please ignore or rate it as not helpful.",
+    #         trustworthy_sources=False,
+    #         post_id=post_with_context.post.post_id
+    #         )
+    # )
 
     log_strings: List[str] = ["-" * 20, f"Post: {post_with_context.post.post_id}", "-" * 20]
     if note_result.context_description is not None:
@@ -35,22 +47,22 @@ def _worker(
         )
 
     if note_result.note is not None and not dry_run:
-        try:
+        # try:
             submit_note(
                 note=note_result.note,
                 test_mode=True,
                 verbose_if_failed=False,
             )
             log_strings.append("\n*SUCCESSFULLY SUBMITTED NOTE*\n")
-        except Exception:
-            log_strings.append(
-                "\n*ERROR SUBMITTING NOTE*: likely we already wrote a note on this post; moving on.\n"
-            )
+        # except Exception as e:
+        #     log_strings.append(
+        #         f"\n*ERROR SUBMITTING NOTE*: likely we already wrote a note on this post; moving on. error: {str(e)}\n"
+        #     )
     print("".join(log_strings) + "\n")
 
 
 def main(
-    num_posts: int = 10,
+    num_posts: int = 1,
     dry_run: bool = False,
     concurrency: int = 1,
 ):
@@ -77,7 +89,7 @@ def main(
             for future in futures:
                 future.result()
     else:
-        for post in eligible_posts:
+        for post in eligible_posts[:1]:
             _worker(post, dry_run)
     print("Done.")
 
@@ -86,11 +98,12 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     parser = argparse.ArgumentParser(description="Run note‑writing bot once.")
     parser.add_argument(
-        "--num-posts", type=int, default=10, help="Number of posts to process"
+        "--num-posts", type=int, default=1, help="Number of posts to process"
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
+        default=False,
         help="Do not submit notes to the API, just print them to the console",
     )
     parser.add_argument(

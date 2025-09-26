@@ -80,7 +80,8 @@ def get_grok_live_search_response(prompt: str, temperature: float = 0.8, model= 
 if __name__ == "__main__":
     dotenv.load_dotenv()
     print(
-        get_grok_live_search_response(
-            "Provide me a digest of world news in the last 2 hours. Please respond with links to each source next to the claims that the source supports."
-        )
+        # get_grok_live_search_response(
+        #     "Provide me a digest of world news in the last 2 hours. Please respond with links to each source next to the claims that the source supports."
+        # )
+        get_grok_response("What is the capital of France?")
     )
