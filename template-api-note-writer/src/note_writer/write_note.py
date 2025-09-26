@@ -6,7 +6,7 @@ from note_writer.llm_util import (
 )
 from note_writer.misleading_tags import get_misleading_tags
 # from pipline import *
-import tweepy
+# import tweepy
 import json
 import os
 import time
@@ -190,127 +190,127 @@ def _check_for_unsupported_media_in_post_with_context(post_with_context: PostWit
         return True
     return False
 
-class XPostFetcher:
-    def __init__(self, bearer_token: str):
-        """Initialize the Tweepy client"""
-        self.client = tweepy.Client(bearer_token=bearer_token)
+# class XPostFetcher:
+#     def __init__(self, bearer_token: str):
+#         """Initialize the Tweepy client"""
+#         self.client = tweepy.Client(bearer_token=bearer_token)
 
-    def get_post(self, tweet_id: str):
-        """Get tweet information for a given ID with a retry mechanism for rate limits."""
-        while True:  # Use a loop to repeatedly try until successful
-            try:
-                response = self.client.get_tweet(
-                    id=tweet_id,
-                    tweet_fields=["created_at", "public_metrics", "lang", "context_annotations"],
-                    expansions=["author_id"],
-                    user_fields=["username", "name", "verified"]
-                )
+#     def get_post(self, tweet_id: str):
+#         """Get tweet information for a given ID with a retry mechanism for rate limits."""
+#         while True:  # Use a loop to repeatedly try until successful
+#             try:
+#                 response = self.client.get_tweet(
+#                     id=tweet_id,
+#                     tweet_fields=["created_at", "public_metrics", "lang", "context_annotations"],
+#                     expansions=["author_id"],
+#                     user_fields=["username", "name", "verified"]
+#                 )
                 
-                if response.data:
-                    tweet = response.data
-                    user = response.includes["users"][0] if "users" in response.includes else None
-                    return {
-                        "id": tweet.id,
-                        "text": tweet.text,
-                        "created_at": tweet.created_at,
-                        "lang": tweet.lang,
-                        "public_metrics": tweet.public_metrics,
-                        "author": {
-                            "id": user.id if user else None,
-                            "username": user.username if user else None,
-                            "name": user.name if user else None,
-                            "verified": user.verified if user else None,
-                        } if user else None
-                    }
-                return None
+#                 if response.data:
+#                     tweet = response.data
+#                     user = response.includes["users"][0] if "users" in response.includes else None
+#                     return {
+#                         "id": tweet.id,
+#                         "text": tweet.text,
+#                         "created_at": tweet.created_at,
+#                         "lang": tweet.lang,
+#                         "public_metrics": tweet.public_metrics,
+#                         "author": {
+#                             "id": user.id if user else None,
+#                             "username": user.username if user else None,
+#                             "name": user.name if user else None,
+#                             "verified": user.verified if user else None,
+#                         } if user else None
+#                     }
+#                 return None
                 
-            except tweepy.errors.TooManyRequests:
-                print("🚨 Rate limit exceeded. Waiting for 15 minutes before retrying...")
-                time.sleep(900)  # Wait for 15 minutes (900 seconds)
+#             except tweepy.errors.TooManyRequests:
+#                 print("🚨 Rate limit exceeded. Waiting for 15 minutes before retrying...")
+#                 time.sleep(900)  # Wait for 15 minutes (900 seconds)
 
-    def get_replies(self, tweet_id: str, limit: int = 100):
-        """
-        Fetch replies for a given Tweet using pagination (up to 7 days).
-        自动分页，并限制最大返回数量和最大请求页数。
+#     def get_replies(self, tweet_id: str, limit: int = 100):
+#         """
+#         Fetch replies for a given Tweet using pagination (up to 7 days).
+#         自动分页，并限制最大返回数量和最大请求页数。
         
-        :param tweet_id: 推文ID
-        :param limit: 希望获取的最大评论数（总数，不超过）
-        """
-        query = f"conversation_id:{tweet_id}"
-        replies = []
-        seen_ids = set()
+#         :param tweet_id: 推文ID
+#         :param limit: 希望获取的最大评论数（总数，不超过）
+#         """
+#         query = f"conversation_id:{tweet_id}"
+#         replies = []
+#         seen_ids = set()
 
-        # API 每次最多100条
-        per_page = min(limit, 100)
-        max_pages = math.ceil(limit / per_page)
+#         # API 每次最多100条
+#         per_page = min(limit, 100)
+#         max_pages = math.ceil(limit / per_page)
 
-        paginator = tweepy.Paginator(
-            self.client.search_recent_tweets,
-            query=query,
-            tweet_fields=["created_at", "public_metrics", "lang", "author_id"],
-            expansions=["author_id"],
-            user_fields=["username", "name", "verified"],
-            max_results=per_page,
-            limit=max_pages   # 限制最大页数，节省请求次数
-        )
+#         paginator = tweepy.Paginator(
+#             self.client.search_recent_tweets,
+#             query=query,
+#             tweet_fields=["created_at", "public_metrics", "lang", "author_id"],
+#             expansions=["author_id"],
+#             user_fields=["username", "name", "verified"],
+#             max_results=per_page,
+#             limit=max_pages   # 限制最大页数，节省请求次数
+#         )
 
-        try:
-            for response in paginator:
-                if not response.data:
-                    continue
+#         try:
+#             for response in paginator:
+#                 if not response.data:
+#                     continue
 
-                users = {u.id: u for u in response.includes.get("users", [])}
+#                 users = {u.id: u for u in response.includes.get("users", [])}
 
-                for tweet in response.data:
-                    if tweet.id in seen_ids:
-                        continue
-                    seen_ids.add(tweet.id)
+#                 for tweet in response.data:
+#                     if tweet.id in seen_ids:
+#                         continue
+#                     seen_ids.add(tweet.id)
 
-                    user = users.get(tweet.author_id)
-                    replies.append({
-                        "id": tweet.id,
-                        "text": tweet.text,
-                        "created_at": tweet.created_at,
-                        "lang": tweet.lang,
-                        "public_metrics": tweet.public_metrics,
-                        "author": {
-                            "id": user.id if user else None,
-                            "username": user.username if user else None,
-                            "name": user.name if user else None,
-                            "verified": user.verified if user else None,
-                        } if user else None
-                    })
+#                     user = users.get(tweet.author_id)
+#                     replies.append({
+#                         "id": tweet.id,
+#                         "text": tweet.text,
+#                         "created_at": tweet.created_at,
+#                         "lang": tweet.lang,
+#                         "public_metrics": tweet.public_metrics,
+#                         "author": {
+#                             "id": user.id if user else None,
+#                             "username": user.username if user else None,
+#                             "name": user.name if user else None,
+#                             "verified": user.verified if user else None,
+#                         } if user else None
+#                     })
 
-                    if len(replies) >= limit:
-                        return replies
+#                     if len(replies) >= limit:
+#                         return replies
 
-        except tweepy.errors.TooManyRequests:
-            print("Rate limit exceeded (429 Too Many Requests).")
-            print("Pausing for 15 minutes before retrying...")
-            time.sleep(900)
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+#         except tweepy.errors.TooManyRequests:
+#             print("Rate limit exceeded (429 Too Many Requests).")
+#             print("Pausing for 15 minutes before retrying...")
+#             time.sleep(900)
+#         except Exception as e:
+#             print(f"An unexpected error occurred: {e}")
 
-        return replies
+#         return replies
 
-def convert_to_timestamp(data):
-    """Recursively convert datetime objects to timestamps in a dictionary or list."""
-    if isinstance(data, dict):
-        new_data = {}
-        for key, value in data.items():
-            if isinstance(value, datetime):
-                new_data[key] = int(value.timestamp())
-            else:
-                new_data[key] = convert_to_timestamp(value)
-        return new_data
-    elif isinstance(data, list):
-        return [convert_to_timestamp(item) for item in data]
-    else:
-        return data
+# def convert_to_timestamp(data):
+#     """Recursively convert datetime objects to timestamps in a dictionary or list."""
+#     if isinstance(data, dict):
+#         new_data = {}
+#         for key, value in data.items():
+#             if isinstance(value, datetime):
+#                 new_data[key] = int(value.timestamp())
+#             else:
+#                 new_data[key] = convert_to_timestamp(value)
+#         return new_data
+#     elif isinstance(data, list):
+#         return [convert_to_timestamp(item) for item in data]
+#     else:
+#         return data
     
-# BEARER_TOKEN = r"AAAAAAAAAAAAAAAAAAAAAPYCkAEAAAAAVnWB%2FgN01ZAr%2BXwINz%2FFF67ItrM%3DQDm7LzdFpu6oFtFSZK18w0999Fo2aeHzCFGG0krrFxp8xS590c" 
-BEARER_TOKEN = "" # Replace with your actual bearer token
-fetcher = XPostFetcher(BEARER_TOKEN)
+# # BEARER_TOKEN = r"AAAAAAAAAAAAAAAAAAAAAPYCkAEAAAAAVnWB%2FgN01ZAr%2BXwINz%2FFF67ItrM%3DQDm7LzdFpu6oFtFSZK18w0999Fo2aeHzCFGG0krrFxp8xS590c" 
+# BEARER_TOKEN = "" # Replace with your actual bearer token
+# fetcher = XPostFetcher(BEARER_TOKEN)
 
 # def research_post_and_write_note(
 #     post_with_context: PostWithContext,
