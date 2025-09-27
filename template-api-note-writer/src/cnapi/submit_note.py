@@ -31,13 +31,13 @@ def submit_note(
         "auth",
         "oauth1",
         "--consumer-key",
-        "dktROYB0ZNRvOq4Z3Z9sfldZC",
+        "FJWzGBdbzkXyfwzGomEsc5omc",
         "--consumer-secret",
-        "Er9L3gNlbTEOS3zA9l0QRs0qL3F6VQNVunZcrOe1M8PPSFf5c0",
+        "M7zLxCQY5t1cD7WC2vYjcJvabLUsGYeYIbfyo11dsZuAFQilg5",
         "--access-token",
-        "1934534495035871232-KU43DIFBzFSOknF9iMrDfPnCLFRWhp",
+        "1934534495035871232-dVNpKzamYCU8s8pjIxjcOWAxGbOspO",
         "--token-secret",
-        "V7fwYir3pbma1JtedpjFsJvs6ayc5xwue7ucm6ljs1ujT",
+        "3L1oOzZFCYJGISXwpv8QDgvNrAPw01RzOGzx1RahVDTf8",
     ]
 
     run_xurl(cmd_verify, verbose_if_failed=verbose_if_failed)
