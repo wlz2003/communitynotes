@@ -16,8 +16,8 @@ def generate_pkce_pair():
 
 client_id = "OHB2RGpCanU0aGgwOEwtWVFCUDQ6MTpjaQ"
 redirect_uri = "https://183.172.202.97:8000/callback"
-code_verifier = "Q0qSlsXa4CSPhv90VIEkFA583_iVQ0Fhv4YoXmag89z1tMx8U_iqKNdR3RWNr1PrdzCam4jc9okEn4GNiBvw4g"
-code_challenge = "kyGYZc87rmL18L1korbqbQ1YaNaWCB4EYdxi9XAfwq8"
+code_verifier =  "AHz748ORYjB2RaHgufkY_DiaOY2qvkQ3a2akoBp08Ce1f5he43WUtq1OIp9I4QDPr8pKOTxyc9o2y_Z3jZMGkg"
+code_challenge =  "xT7z3vADhZiL8_zBEtdYkPUlzkAXfB1XXhYUnYOU9d4"
 
 # authorize_url = (
 #     "https://twitter.com/i/oauth2/authorize"
@@ -68,6 +68,6 @@ def exchange_code_for_token(client_id, code, code_verifier, redirect_uri):
 
 
 # 使用示例
-code = "TXhDR0tjZ0R1WHllTEw1WmFnQ2xEOFNiUHJjdUM5bmNqaG50cVJwYlZBM0lrOjE3NTg4OTcxNDcxNTA6MToxOmFjOjE"
+code = "MlhtWlBqUmcyV3c0cDEwNERGNFZ1WkFQVG4xanJOcXRGODJwS3BHaVZ2VVhvOjE3NTg5NDM0OTg3NTc6MTowOmFjOjE"
 token_data = exchange_code_for_token(client_id, code, code_verifier, redirect_uri)
 print(token_data)
