@@ -29,9 +29,15 @@ def submit_note(
     cmd_verify = [
         "xurl",
         "auth",
-        "app",
-        "--bearer-token"
-        "'TU9JdjlkeXFQSVIzNEJPeENCSmJ2dERMeUotWlMtZUtNRzBqeEt2MThlemVkOjE3NTg5NDM1Mjc3MDY6MTowOmF0OjE'"
+        "oauth1",
+        "--consumer-key",
+        "dktROYB0ZNRvOq4Z3Z9sfldZC",
+        "--consumer-secret",
+        "Er9L3gNlbTEOS3zA9l0QRs0qL3F6VQNVunZcrOe1M8PPSFf5c0",
+        "--access-token",
+        "1934534495035871232-KU43DIFBzFSOknF9iMrDfPnCLFRWhp",
+        "--token-secret",
+        "V7fwYir3pbma1JtedpjFsJvs6ayc5xwue7ucm6ljs1ujT",
     ]
 
     run_xurl(cmd_verify, verbose_if_failed=verbose_if_failed)
