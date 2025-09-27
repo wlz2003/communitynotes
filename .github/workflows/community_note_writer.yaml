@@ -1,14 +1,8 @@
 name: Template API Note Writer
 
 on:
-  # Allow manual triggering of the workflow via Github Actions
   workflow_dispatch:
 
-  # Uncomment the cron schedule to start automated runs via Github Actions
-  #schedule:
-  #  - cron: '*/15 * * * *'
-
-# Add concurrency group to prevent parallel runs
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -31,19 +25,28 @@ jobs:
           sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/xdevplatform/xurl/main/install.sh)"
 
       - name: Authenticate xurl via Oauth 1.0
-        run: xurl auth oauth1 --consumer-key "$X_API_KEY" --consumer-secret "$X_API_KEY_SECRET" --access-token "$X_ACCESS_TOKEN" --token-secret "$X_ACCESS_TOKEN_SECRET"
-        # Read the environment variables from the github repository.
-        # Store under Settings --> Secrets and variables --> Actions
+        run: |
+          echo "Authenticating xurl..."
+          xurl auth oauth1 \
+            --consumer-key "$X_API_KEY" \
+            --consumer-secret "$X_API_KEY_SECRET" \
+            --access-token "$X_ACCESS_TOKEN" \
+            --token-secret "$X_ACCESS_TOKEN_SECRET"
         env: 
-          X_API_KEY:    dktROYB0ZNRvOq4Z3Z9sfldZC
-          X_API_KEY_SECRET: Er9L3gNlbTEOS3zA9l0QRs0qL3F6VQNVunZcrOe1M8PPSFf5c0
-          X_ACCESS_TOKEN:    1934534495035871232-KU43DIFBzFSOknF9iMrDfPnCLFRWhp
-          X_ACCESS_TOKEN_SECRET:    V7fwYir3pbma1JtedpjFsJvs6ayc5xwue7ucm6ljs1ujT
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
       
-      - name: Run bot
-        run: cd template-api-note-writer && uv run src/main.py
-        # Read the environment variables from the github repository.
-        # Store under Settings --> Secrets and variables --> Actions
+      - name: Run bot with debug logging
+        run: |
+          set -x   # 打印每条命令
+          cd template-api-note-writer
+          # 捕获并打印 stdout / stderr
+          uv run src/main.py > run_stdout.log 2> run_stderr.log || true
+          echo "====== STDOUT ======"
+          cat run_stdout.log
+          echo "====== STDERR ======"
+          cat run_stderr.log
         env:
-          # XAI_API_KEY: ${{ secrets.XAI_API_KEY }} # Optional: delete if not using XAI API
-          BERAER_TOKEN: TU9JdjlkeXFQSVIzNEJPeENCSmJ2dERMeUotWlMtZUtNRzBqeEt2MThlemVkOjE3NTg5NDM1Mjc3MDY6MTowOmF0OjE # Required: create a secret variable in the repository with your Beraer token
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}  # 修正拼写错误（原来是 BERAER_TOKEN）
