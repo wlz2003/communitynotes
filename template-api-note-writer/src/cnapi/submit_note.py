@@ -26,6 +26,16 @@ def submit_note(
         },
     }
 
+    cmd_verify = [
+        "xurl",
+        "auth",
+        "app",
+        "--bearer-token"
+        "'TU9JdjlkeXFQSVIzNEJPeENCSmJ2dERMeUotWlMtZUtNRzBqeEt2MThlemVkOjE3NTg5NDM1Mjc3MDY6MTowOmF0OjE'"
+    ]
+
+    run_xurl(cmd_verify, verbose_if_failed=verbose_if_failed)
+
     cmd = [
         "xurl",
         "-X",
