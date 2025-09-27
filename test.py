@@ -68,6 +68,6 @@ def exchange_code_for_token(client_id, code, code_verifier, redirect_uri):
 
 
 # 使用示例
-code = "MlhtWlBqUmcyV3c0cDEwNERGNFZ1WkFQVG4xanJOcXRGODJwS3BHaVZ2VVhvOjE3NTg5NDM0OTg3NTc6MTowOmFjOjE"
+code = "SmR3LWswMzRYQnBMVkprUExvUWUzNUZsOFF4WmlJamFtZHM1NnpZVVVTcEpHOjE3NTg5NjM1MjMyMTY6MTowOmFjOjE"
 token_data = exchange_code_for_token(client_id, code, code_verifier, redirect_uri)
 print(token_data)
