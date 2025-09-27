@@ -361,7 +361,7 @@ def research_post_and_write_note(
         post=post_with_context.model_dump(),
         note=ProposedMisleadingNote(
             post_id=post_with_context.post.post_id,
-            note_text="This is a test, please ignore or rate it as not helpful.",
+            note_text="This is a test, please ignore or rate it as not helpful. https://x.com/",
             misleading_tags=["other"],
         ),
         context_description="post_with_context_description",
