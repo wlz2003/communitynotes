@@ -3,7 +3,7 @@ import subprocess
 from typing import Any, Dict, List
 
 
-def run_xurl(cmd: List[str], verbose_if_failed: bool = False) -> Dict[str, Any]:
+def run_xurl(cmd: List[str], verbose_if_failed: bool = True) -> Dict[str, Any]:
     """
     Run `xurl` and return its JSON stdout as a Python dict.
     Currently extremely simple without any retry logic.

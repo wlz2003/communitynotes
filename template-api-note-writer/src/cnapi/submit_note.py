@@ -9,7 +9,7 @@ from data_models import ProposedMisleadingNote
 def submit_note(
     note: ProposedMisleadingNote,
     test_mode: bool = True,
-    verbose_if_failed: bool = False,
+    verbose_if_failed: bool = True,
 ) -> Dict[str, Any]:
     """
     Submit a note to the Community Notes API. For more details, see:
