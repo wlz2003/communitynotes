@@ -22,4 +22,5 @@ def run_xurl(cmd: List[str], verbose_if_failed: bool = True) -> Dict[str, Any]:
                 print(exc.stderr, end="", flush=True)
         raise
     print("==--++completed.stdout: ",completed.stdout)
-    return json.loads(completed.stdout)
+    # return json.loads(completed.stdout)
+    return str(completed.stdout)
