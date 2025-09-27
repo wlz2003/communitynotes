@@ -15,16 +15,6 @@ def submit_note(
     Submit a note to the Community Notes API. For more details, see:
     https://docs.x.com/x-api/community-notes/introduction
     """
-    payload = {
-        "test_mode": test_mode,
-        "post_id": note.post_id,
-        "info": {
-            "text": note.note_text,
-            "classification": "misinformed_or_potentially_misleading",
-            "misleading_tags": [tag.value for tag in note.misleading_tags],
-            "trustworthy_sources": True,
-        },
-    }
 
     cmd_verify = [
         "xurl",
@@ -41,6 +31,17 @@ def submit_note(
     ]
 
     run_xurl(cmd_verify, verbose_if_failed=verbose_if_failed)
+
+    payload = {
+        "test_mode": test_mode,
+        "post_id": note.post_id,
+        "info": {
+            "text": note.note_text,
+            "classification": "misinformed_or_potentially_misleading",
+            "misleading_tags": [tag.value for tag in note.misleading_tags],
+            "trustworthy_sources": False,
+        },
+    }
 
     cmd = [
         "xurl",
