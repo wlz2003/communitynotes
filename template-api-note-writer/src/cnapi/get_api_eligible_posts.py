@@ -6,6 +6,8 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 from enum import Enum
 from .xurl_util import run_xurl
+import json
+
 class ProposedNote(BaseModel):
     post_id: str
     note_text: str
@@ -170,6 +172,8 @@ def _parse_posts_eligible_response(resp: Dict) -> List[PostWithContext]:
     Returns:
         A list of `Post` objects, each containing associated `Media` objects if available.
     """
+    if not isinstance(resp, dict):
+        resp = json.loads(resp)
     includes_media = resp.get("includes", {}).get("media", [])
     media_by_key = {m["media_key"]: m for m in includes_media}
 
