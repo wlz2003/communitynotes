@@ -5,6 +5,7 @@ import requests
 from typing import Dict, List, Optional
 from pydantic import BaseModel
 from enum import Enum
+from .xurl_util import run_xurl
 class ProposedNote(BaseModel):
     post_id: str
     note_text: str
@@ -57,36 +58,79 @@ class NoteResult(BaseModel):
     post: Optional[PostWithContext] = None
     context_description: Optional[str] = None
 
+# def _fetch_posts_eligible_for_notes(
+#     bearer_token: str,
+#     max_results: int = 2,
+#     test_mode: bool = True,
+# ) -> Dict:
+#     """
+#     Fetch posts eligible for notes by calling the Community Notes API directly via HTTP request.
+#     Prints full response content if the request fails.
+#     """
+#     url = "https://api.x.com/2/notes/search/posts_eligible_for_notes"
+#     params = {
+#         "test_mode": str(test_mode).lower(),
+#         "max_results": max_results,
+#         "tweet.fields": "author_id,created_at,referenced_tweets,media_metadata,note_tweet",
+#         "expansions": "attachments.media_keys,referenced_tweets.id,referenced_tweets.id.attachments.media_keys",
+#         "media.fields": "alt_text,duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants",
+#     }
+#     headers = {"Authorization": f"Bearer {bearer_token}"}
+
+#     response = requests.get(url, headers=headers, params=params)
+
+#     if not response.ok:
+#         print("=== Response Debug Info ===")
+#         print(f"Status Code: {response.status_code}")
+#         print("Headers:", response.headers)
+#         print("Body:", response.text)
+#         print("===========================")
+
+#     response.raise_for_status()
+#     return response.json()
+
 def _fetch_posts_eligible_for_notes(
-    bearer_token: str,
-    max_results: int = 2,
-    test_mode: bool = True,
-) -> Dict:
+    max_results: int = 2, test_mode: bool = True
+) -> dict:
     """
-    Fetch posts eligible for notes by calling the Community Notes API directly via HTTP request.
-    Prints full response content if the request fails.
+    Fetch posts eligible for notes by calling the Community Notes API.
+    For more details, see: https://docs.x.com/x-api/community-notes/introduction
+    Args:
+        max_results: Maximum number of results to return (default is 2).
+        test_mode: If True, use test mode for the API (default is True).
+    Returns:
+        A dictionary containing the API response.
     """
-    url = "https://api.x.com/2/notes/search/posts_eligible_for_notes"
-    params = {
-        "test_mode": str(test_mode).lower(),
-        "max_results": max_results,
-        "tweet.fields": "author_id,created_at,referenced_tweets,media_metadata,note_tweet",
-        "expansions": "attachments.media_keys,referenced_tweets.id,referenced_tweets.id.attachments.media_keys",
-        "media.fields": "alt_text,duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants",
-    }
-    headers = {"Authorization": f"Bearer {bearer_token}"}
 
-    response = requests.get(url, headers=headers, params=params)
+    cmd_verify = [
+        "xurl",
+        "auth",
+        "oauth1",
+        "--consumer-key",
+        "FJWzGBdbzkXyfwzGomEsc5omc",
+        "--consumer-secret",
+        "M7zLxCQY5t1cD7WC2vYjcJvabLUsGYeYIbfyo11dsZuAFQilg5",
+        "--access-token",
+        "1934534495035871232-dVNpKzamYCU8s8pjIxjcOWAxGbOspO",
+        "--token-secret",
+        "3L1oOzZFCYJGISXwpv8QDgvNrAPw01RzOGzx1RahVDTf8",
+    ]
 
-    if not response.ok:
-        print("=== Response Debug Info ===")
-        print(f"Status Code: {response.status_code}")
-        print("Headers:", response.headers)
-        print("Body:", response.text)
-        print("===========================")
+    run_xurl(cmd_verify, verbose_if_failed=True)
 
-    response.raise_for_status()
-    return response.json()
+    path = (
+        "/2/notes/search/posts_eligible_for_notes"
+        f"?test_mode={'true' if test_mode else 'false'}"
+        f"&max_results={max_results}"
+        "&tweet.fields=author_id,created_at,referenced_tweets,media_metadata,note_tweet"
+        "&expansions=attachments.media_keys,referenced_tweets.id,referenced_tweets.id.attachments.media_keys"
+        "&media.fields=alt_text,duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants"
+    )
+    cmd = [
+        "xurl",
+        path,
+    ]
+    return run_xurl(cmd)
 
 
 def _parse_individual_post(item: Dict, media_by_key: Dict[str, Dict]) -> Post:
@@ -182,7 +226,7 @@ def get_posts_eligible_for_notes(
         A list of `Post` objects.
     """
     return _parse_posts_eligible_response(
-        _fetch_posts_eligible_for_notes("LWVnTG8wRG5VYWZJb3dfbUdEVXJHSFFOMWtVeUg2am1qNTB0THlTT2N5alV1OjE3NTg5NjM1NDk4ODU6MTowOmF0OjE",max_results, test_mode)
+        _fetch_posts_eligible_for_notes(max_results, test_mode)
     )
 
 
