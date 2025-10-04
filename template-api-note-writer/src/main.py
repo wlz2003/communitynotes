@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        default=True,
+        default=False,
         help="Do not submit notes to the API, just print them to the console",
     )
     parser.add_argument(
